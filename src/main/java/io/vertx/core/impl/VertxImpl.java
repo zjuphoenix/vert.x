@@ -130,16 +130,25 @@ public class VertxImpl implements VertxInternal, MetricsProvider {
     closeHooks = new CloseHooks(log);
     checker = new BlockedThreadChecker(options.getBlockedThreadCheckInterval(), options.getWarningExceptionTime());
     eventLoopThreadFactory = new VertxThreadFactory("vert.x-eventloop-thread-", checker, false, options.getMaxEventLoopExecuteTime());
+    /**
+     * vertx中设置的eventloop pool size对应netty中的worker eventloop
+     */
     eventLoopGroup = new NioEventLoopGroup(options.getEventLoopPoolSize(), eventLoopThreadFactory);
     eventLoopGroup.setIoRatio(NETTY_IO_RATIO);
     ThreadFactory acceptorEventLoopThreadFactory = new VertxThreadFactory("vert.x-acceptor-thread-", checker, false, options.getMaxEventLoopExecuteTime());
     // The acceptor event loop thread needs to be from a different pool otherwise can get lags in accepted connections
     // under a lot of load
+    /**
+     * acceptorEventLoopGroup只有1个线程，用于接收accept请求
+     */
     acceptorEventLoopGroup = new NioEventLoopGroup(1, acceptorEventLoopThreadFactory);
     acceptorEventLoopGroup.setIoRatio(100);
 
     metrics = initialiseMetrics(options);
 
+    /**
+     * vertx中的work pool为自定义的线程池，相当于netty里自定义的业务线程池
+     */
     ExecutorService workerExec = Executors.newFixedThreadPool(options.getWorkerPoolSize(),
         new VertxThreadFactory("vert.x-worker-thread-", checker, true, options.getMaxWorkerExecuteTime()));
     PoolMetrics workerPoolMetrics = isMetricsEnabled() ? metrics.createMetrics(workerExec, "worker", "vert.x-worker-thread", options.getWorkerPoolSize()) : null;
