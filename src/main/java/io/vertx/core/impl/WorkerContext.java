@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
+ * 通过WorkerContext的executeAsync和executeFromIO提交的runnable都是在该WorkerContext的WorkerPool创建的顺序执行器线程中执行的
  */
 public class WorkerContext extends ContextImpl {
 
@@ -31,6 +32,9 @@ public class WorkerContext extends ContextImpl {
 
   @Override
   public void executeAsync(Handler<Void> task) {
+    /**
+     * workerExec是通过workerPool创建的顺序执行器，顺序执行器每次执行runnable可能在不同的线程执行。
+     */
     workerExec.execute(wrapTask(null, task, true, workerPool.metrics()));
   }
 

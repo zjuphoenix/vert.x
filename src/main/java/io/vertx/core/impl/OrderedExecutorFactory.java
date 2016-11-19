@@ -103,6 +103,9 @@ public class OrderedExecutorFactory {
      * Run a task.
      *
      * @param command the task to run.
+     * 执行任务只是将runnable任务放到tasks任务队列，这样保证了提交的runnable的顺序执行，
+     * 因为runnable按顺序放入到tasks，每次执行都是从tasks中取出一个任务执行。
+     * parent为OrderedExecutorFactory的线程池。
      */
     public void execute(Runnable command) {
       synchronized (tasks) {

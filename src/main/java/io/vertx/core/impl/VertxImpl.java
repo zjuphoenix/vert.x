@@ -580,6 +580,7 @@ public class VertxImpl implements VertxInternal, MetricsProvider {
     if (options.isHa() && haManager() != null && haManager().isEnabled()) {
       haManager().deployVerticle(name, options, completionHandler);
     } else {
+      //1
       deploymentManager.deployVerticle(name, options, completionHandler);
     }
   }

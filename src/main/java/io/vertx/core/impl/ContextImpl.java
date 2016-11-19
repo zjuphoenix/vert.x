@@ -66,6 +66,10 @@ public abstract class ContextImpl implements ContextInternal {
     }
     this.deploymentID = deploymentID;
     this.config = config;
+    /**
+     * 这里得到的是vertx的eventloopgroup，即netty的worker eventloopgroup
+     * 每次创建上下文都会从vertx的eventloop线程池中取出1个eventloop作为上下文的eventloop
+     */
     EventLoopGroup group = vertx.getEventLoopGroup();
     if (group != null) {
       this.eventLoop = group.next();
@@ -74,6 +78,9 @@ public abstract class ContextImpl implements ContextInternal {
     }
     this.tccl = tccl;
     this.owner = vertx;
+    /**
+     * 每个上下文的workerPool为vertx的workerPool
+     */
     this.workerPool = workerPool;
     this.internalBlockingPool = internalBlockingPool;
     this.orderedInternalPoolExec = internalBlockingPool.createOrderedExecutor();
@@ -228,15 +235,25 @@ public abstract class ContextImpl implements ContextInternal {
   }
 
   // Execute an internal task on the internal blocking ordered executor
+
+  /**
+   * 如果只传递action和resultHandler两个参数的话那该action会在内部阻塞线程池internalBlockingPool中实现
+   */
   public <T> void executeBlocking(Action<T> action, Handler<AsyncResult<T>> resultHandler) {
     executeBlocking(action, null, resultHandler, orderedInternalPoolExec, internalBlockingPool.metrics());
   }
 
+  /**
+   * 传递blockingCodeHandler、ordered、resultHandler这3个参数时，blockingCodeHandler会在worker线程池执行，ordered决定是否顺序执行
+   */
   @Override
   public <T> void executeBlocking(Handler<Future<T>> blockingCodeHandler, boolean ordered, Handler<AsyncResult<T>> resultHandler) {
     executeBlocking(null, blockingCodeHandler, resultHandler, ordered ? workerExec : workerPool.executor(), workerPool.metrics());
   }
 
+  /**
+   * 传递blockingCodeHandler、resultHandler这2个参数时，blockingCodeHandler会在worker线程池执行，并且会顺序执行
+   */
   @Override
   public <T> void executeBlocking(Handler<Future<T>> blockingCodeHandler, Handler<AsyncResult<T>> resultHandler) {
     executeBlocking(blockingCodeHandler, true, resultHandler);

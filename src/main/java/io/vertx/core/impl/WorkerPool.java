@@ -27,6 +27,9 @@ import java.util.concurrent.ExecutorService;
 class WorkerPool {
 
   private final OrderedExecutorFactory orderedFact;
+  /**
+   * WorkerPool中维护着一个线程池ExecutorService，通过OrderedExecutorFactory包装ExecutorService，成为可以生产顺序执行器OrderedExecutor的工厂
+   */
   private final ExecutorService pool;
   private final PoolMetrics metrics;
 
@@ -36,10 +39,16 @@ class WorkerPool {
     this.metrics = metrics;
   }
 
+  /**
+   * 创建一般的执行器
+   */
   ExecutorService executor() {
     return pool;
   }
 
+  /**
+   * 创建1个顺序执行器
+   */
   Executor createOrderedExecutor() {
     return orderedFact.getExecutor();
   }

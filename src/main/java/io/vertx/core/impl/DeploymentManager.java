@@ -87,6 +87,11 @@ public class DeploymentManager {
                              Handler<AsyncResult<String>> completionHandler) {
     ContextImpl callingContext = vertx.getOrCreateContext();
     ClassLoader cl = getClassLoader(options, callingContext);
+    //2
+    /**
+     * identifier为verticle类的全限定名
+     * callingContext为eventloop context
+     */
     doDeployVerticle(identifier, generateDeploymentID(), options, callingContext, callingContext, cl, completionHandler);
   }
 
@@ -99,6 +104,10 @@ public class DeploymentManager {
                                 Handler<AsyncResult<String>> completionHandler) {
     List<VerticleFactory> verticleFactories = resolveFactories(identifier);
     Iterator<VerticleFactory> iter = verticleFactories.iterator();
+    //4
+    /**
+     * parentContext和callingContext都是eventloop context
+     */
     doDeployVerticle(iter, null, identifier, deploymentID, options, parentContext, callingContext, cl, completionHandler);
   }
 
@@ -111,6 +120,7 @@ public class DeploymentManager {
                                 ContextImpl callingContext,
                                 ClassLoader cl,
                                 Handler<AsyncResult<String>> completionHandler) {
+    //5
     if (iter.hasNext()) {
       VerticleFactory verticleFactory = iter.next();
       Future<String> fut = Future.future();
@@ -130,6 +140,10 @@ public class DeploymentManager {
       fut.setHandler(ar -> {
         Throwable err;
         if (ar.succeeded()) {
+          //6
+          /**
+           * resolvedName为verticle类全限定名
+           */
           String resolvedName = ar.result();
           if (!resolvedName.equals(identifier)) {
             deployVerticle(resolvedName, options, completionHandler);
@@ -154,6 +168,7 @@ public class DeploymentManager {
               return;
             } else {
               try {
+                //7
                 Verticle[] verticles = createVerticles(verticleFactory, identifier, options.getInstances(), cl);
                 doDeploy(identifier, deploymentID, options, parentContext, callingContext, completionHandler, cl, verticles);
                 return;
@@ -406,6 +421,7 @@ public class DeploymentManager {
                         ContextImpl callingContext,
                         Handler<AsyncResult<String>> completionHandler,
                         ClassLoader tccl, Verticle... verticles) {
+    //8
     if (options.isMultiThreaded() && !options.isWorker()) {
       throw new IllegalArgumentException("If multi-threaded then must be worker too");
     }
