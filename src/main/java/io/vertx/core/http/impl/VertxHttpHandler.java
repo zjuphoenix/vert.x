@@ -68,6 +68,10 @@ public abstract class VertxHttpHandler<C extends ConnectionBase> extends VertxHa
     @Override
     protected void channelRead(final C connection, final ContextImpl context, final ChannelHandlerContext chctx, final Object msg) throws Exception {
         if (connection != null) {
+            /**
+             * 如果是standard模式，executeFromIO会在当前eventloop线程中执行；
+             * 如果是worker模式，executeFromIO会在worker线程的顺序执行器执行。
+             */
             context.executeFromIO(() -> doMessageReceived(connection, chctx, msg));
         } else {
             // We execute this directly as we don't have a context yet, the context will have to be set manually

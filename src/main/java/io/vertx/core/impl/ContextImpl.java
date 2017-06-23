@@ -312,6 +312,15 @@ public abstract class ContextImpl implements ContextInternal {
         return contextData;
     }
 
+    /**
+     * 包装PoolMetrics到执行链路，缺省情况metrics为DummyWorkerPoolMetrics，所有方法空执行，
+     * 当设置DropwizardMetricsOptions时，这里的metrics为PoolMetricsImpl
+     * @param cTask
+     * @param hTask
+     * @param checkThread
+     * @param metrics
+     * @return
+     */
     protected Runnable wrapTask(ContextTask cTask, Handler<Void> hTask, boolean checkThread, PoolMetrics metrics) {
         Object metric = metrics != null ? metrics.submitted() : null;
         return () -> {

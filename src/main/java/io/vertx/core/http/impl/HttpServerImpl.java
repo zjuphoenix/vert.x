@@ -242,6 +242,7 @@ public class HttpServerImpl implements HttpServer, Closeable, MetricsProvider {
         }
         /**
          * 每次创建listenContext会从eventloopGroup中按顺序选择1个eventloop放到listenContext中。
+         * 对于worker模式，得到的context为WorkerContext，但会把WorkerContext的eventloop作为netty的读写监听eventloop。这样的话感觉在worker模式handler并不是在worker线程执行，还是在eventloop线程执行？
          */
         listenContext = vertx.getOrCreateContext();
         listening = true;
@@ -688,8 +689,7 @@ public class HttpServerImpl implements HttpServer, Closeable, MetricsProvider {
                 }
             } else {
                 if (conn == null) {
-
-
+                    //
                     createConnAndHandle(ctx, ch, msg, null);
                 } else {
                     conn.handleMessage(msg);
